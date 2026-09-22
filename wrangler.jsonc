@@ -1,0 +1,16 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "daily-cron",
+  "main": "daily-cron.js",
+  "compatibility_date": "2026-09-22",
+  "triggers": {
+    // 每 30 分钟触发一次。任务周期是 6h~168h，可放宽到 "0 */6 * * *" 节省配额
+    "crons": ["*/30 * * * *"]
+  },
+  "kv_namespaces": [
+    {
+      "binding": "TASKS",
+      "id": "<YOUR_KV_NAMESPACE_ID>"
+    }
+  ]
+}
