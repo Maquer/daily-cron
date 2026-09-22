@@ -1,0 +1,24 @@
+# Wrangler 本地开发（含 Bark key 等 Secret，绝不提交）
+.dev.vars
+
+# Node.js
+node_modules/
+
+# Wrangler 构建产物
+.wrangler/
+dist/
+
+# 系统
+.DS_Store
+Thumbs.db
+
+# 编辑器
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+*.log
+
+# Cloudflare Pages 日志
+logs/
