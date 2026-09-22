@@ -5,12 +5,13 @@ name = "daily-cron"
 main = "daily-cron.js"
 compatibility_date = "2026-09-21"
 
-# Cron Trigger（每 6 小时 UTC）
-crontab = ["0 */6 * * *"]
+# Cron Trigger 由 CF Dashboard 管理（wrangler deploy 不覆盖）
+# 当前 crontab: 0 */6 * * * (每 6 小时 UTC)
+# 若要改频率：Cloudflare Dashboard → Workers & Pages → daily-cron → Settings → Triggers → Cron
 
 # KV 存储
 kv_namespaces = [
   { binding = "TASKS", id = "3739028244434433996ddaff2776fa51" }
 ]
 
-# BARK_KEY 通过 wrangler secret 上传（不硬编码在仓库）
+# BARK_KEY 通过 GitHub Actions 用 `wrangler secret put` 单独上传

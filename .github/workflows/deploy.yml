@@ -1,8 +1,8 @@
 # Deploy daily-cron Worker to Cloudflare
-# 触发：push 到 main 分支时自动部署
+# 触发：push 到 master 分支时自动部署
 # 需要 GitHub Secrets：
 #   - CLOUDFLARE_API_TOKEN  (有 Workers Scripts:Edit + Triggers:Edit 权限)
-#   - BARK_KEY              (Bark 推送 key)
+#   - BARK_KEY              (Bark push key)
 
 name: Deploy Worker
 
@@ -21,9 +21,12 @@ jobs:
         with:
           node-version: 22
 
-      - name: Deploy to Cloudflare
+      - name: Upload BARK_KEY as secret
+        run: echo "${{ secrets.BARK_KEY }}" | npx --yes wrangler@4 secret put BARK_KEY
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Deploy Worker
         run: npx --yes wrangler@4 deploy --no-bundle
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          # Wrangler 自动把 WRANGLER_VAR_<name> 环境变量作为 plain_text 绑定上传
-          WRANGLER_VAR_BARK_KEY: ${{ secrets.BARK_KEY }}
