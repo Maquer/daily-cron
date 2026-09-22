@@ -25,5 +25,5 @@ jobs:
         run: npx --yes wrangler@4 deploy --no-bundle
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          # Wrangler 自动识别 WRANGLER_SECRET_<name> 环境变量为 secret_text 绑定
-          WRANGLER_SECRET_BARK_KEY: ${{ secrets.BARK_KEY }}
+          # Wrangler 自动把 WRANGLER_VAR_<name> 环境变量作为 plain_text 绑定上传
+          WRANGLER_VAR_BARK_KEY: ${{ secrets.BARK_KEY }}
