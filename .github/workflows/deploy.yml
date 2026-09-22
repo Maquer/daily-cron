@@ -1,0 +1,51 @@
+name: Deploy
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  # PR 上跑本地验证（不需要 CF token），检查 wrangler.jsonc 语法和 Worker 入口是否可打包
+  validate-config:
+    name: Validate config (PR)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Dry-run deploy (no upload)
+        run: npx wrangler deploy --dry-run
+
+  # Push 到 master 后自动部署到生产
+  deploy:
+    name: Deploy to Cloudflare
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Deploy
+        run: npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: *** secrets.CLOUDFLARE_API_TOKEN }}
+
+  # 手动部署时同时更新 Secret（可选，避免 Secret 过期）
+  deploy-and-verify:
+    name: Deploy + Verify
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify deployed Worker is reachable
+        run: |
+          URL="https://daily-cron.lovemaquer.workers.dev/test"
+          echo "Probing $URL"
+          curl -s -o /dev/null -w "HTTP %{http_code}\n" "$URL" || echo "Not yet live (first deploy may take 30s)"
