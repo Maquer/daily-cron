@@ -6,12 +6,11 @@ main = "daily-cron.js"
 compatibility_date = "2026-09-21"
 
 # Cron Trigger（每 6 小时 UTC）
-triggers = { crontab = ["0 */6 * * *"] }
+crontab = ["0 */6 * * *"]
 
-# KV 存储：TASKS
+# KV 存储
 kv_namespaces = [
-  { binding = "TASKS", id = "3739028244434433996ddaff2776fa51", title = "minis-tasks" }
+  { binding = "TASKS", id = "3739028244434433996ddaff2776fa51" }
 ]
 
-# BARK_KEY 通过 Secrets 传入（不在仓库里硬编码）
-# 部署时通过 wrangler deploy --var BARK_KEY=$BARK_KEY 传入
+# BARK_KEY 通过 wrangler secret 上传（不硬编码在仓库）
