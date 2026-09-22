@@ -84,13 +84,50 @@ Wrangler 会自动部署 Worker、注册 Cron Trigger、绑定 KV Namespace—�
 
 访问 `https://daily-cron.lovemaquer.workers.dev/test` 手动触发一次 Bark push。
 
+## 自动部署（可选）
+
+仓库已配置 GitHub Actions 工作流（`.github/workflows/deploy.yml`）：
+
+| 事件 | 行为 | 需要 CF token? |
+|------|------|--------------|
+| PR 打开/更新 | `wrangler deploy --dry-run`（本地构建检查，不上传） | ❌ |
+| Push 到 master | `wrangler deploy`（真部署到生产） | ✅ |
+| 手动 Run workflow | 部署 + curl 探测 `/test` | ✅ |
+
+### 启用自动部署
+
+如果不配置 CF token，push 到 master 时 CI 会失败（但本地 `wrangler deploy` 仍可工作）。要启用：
+
+1. 生成 Cloudflare API Token
+   - 打开 https://dash.cloudflare.com/profile/api-tokens
+   - 点击 **Create Token** → 选模板 **Edit Cloudflare Workers**（或 Custom token，勾上 `Worker Scripts: Edit` + `Worker Routes: Edit`）
+   - 选择资源：只勾一个 Worker 或整个 Account
+   - 生成后复制 token（只显示一次）
+
+2. 在 GitHub 添加 Secret
+   - 打开 https://github.com/Maquer/daily-cron/settings/secrets/actions
+   - 点击 **New repository secret**
+   - Name：`CLOUDFLARE_API_TOKEN`
+   - Value：粘贴上一步的 token
+
+3. 合并 PR 后 CI 自动部署
+   - 打开 Actions 标签页，可看到每次 push 的部署记录
+   - 出错可点 Re-run jobs 重试
+
+### 手动部署（不想等 CI）
+
+在任何 GitHub Action 页面点 **Run workflow**，选 master 分支执行。适合：
+- CI 排队太久
+- 想验证某次改动
+- 手动 re-deploy（比如改了 Cron 但没改代码）
+
 ## 更新任务
 
 更新任务不需要重新部署 Worker，只需更新 KV 中的任务配置：
 
 ```bash
-# 方法1: Cloudflare Dashboard → KV → 编辑 tasks 键
-# 方法2: Cloudflare API
+# 方法1：Cloudflare Dashboard → KV → 编辑 tasks 键
+# 方法2：Cloudflare API
 curl -X PUT https://api.cloudflare.com/client/v4/accounts/{account_id}/workers/kv/namespaces/{namespace_id}/values/tasks \
   -H "Authorization: Bearer {token}" \
   -d '[{"tag":"TASK:daily-cron","body":"...","params":{}}]'
@@ -114,30 +151,4 @@ npx wrangler deploy     # 部署到 Cloudflare
 | `0 6,18 * * *` | 每天 2 次 | 早/晚各一次 |
 | `0 3 * * *` | 每天 1 次 | 凌晨 3 点（UTC，北京时间 11 点） |
 
-改完重新 `npx wrangler deploy` 生效。
-
-
-## 更新任务
-
-更新任务不需要重新部署 Worker，只需更新 KV 中的任务配置：
-
-```bash
-# 方法1：Cloudflare Dashboard → KV → 编辑 tasks 键
-# 方法2：Cloudflare API
-curl -X PUT https://api.cloudflare.com/client/v4/accounts/{account_id}/workers/kv/namespaces/{namespace_id}/values/tasks \
-  -H "Authorization: Bearer {token}" \
-  -d '[{"tag":"TASK:daily-cron","body":"...","params":{}}]'
-```
-
-## 本地开发
-
-```bash
-# 安装 Wrangler
-npm install -g wrangler
-
-# 登录
-wrangler login
-
-# 部署
-wrangler deploy
-```
+改完重新 `npx wrangler deploy` 生效（或直接推 master 让 CI 自动部署）。
