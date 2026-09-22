@@ -1,11 +1,11 @@
 # daily-cron
 
-Cloudflare Worker：每 30 分钟 Bark push 一次，唤醒 iOS → Minis → countdown-scheduler
+Cloudflare Worker：每 6 小时 Bark push 一次，唤醒 iOS → Minis → countdown-scheduler
 
 ## 架构
 
 ```
-Cloudflare Cron (每30分钟)
+Cloudflare Cron (每6小时)
   → Bark push (TASK:daily-cron)
     → iOS Bark 通知 (带链接)
       → 用户点击 → Minis 终端
@@ -53,7 +53,7 @@ Cloudflare Cron (每30分钟)
    - Name: `BARK_KEY`
    - Value: 你的 Bark key
 4. 在 Settings → Triggers 中添加 Cron Trigger：
-   - Cron 表达式：`*/30 * * * *`
+   - Cron 表达式：`0 */6 * * *`
 5. 点击 Deploy
 
 ### 4. 测试

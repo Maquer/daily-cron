@@ -4,7 +4,7 @@
 // 部署方式：Cloudflare Dashboard → Workers & Pages → Create Worker
 // KV Namespace: TASKS（需要在 Cloudflare Dashboard 创建）
 // Secrets: BARK_KEY
-// Trigger: Cron */30 * * * * (UTC 每 30 分钟)
+// Trigger: Cron 0 */6 * * * (UTC 每 6 小时)
 
 // 默认任务列表（KV 为空时使用）
 const DEFAULT_TASKS = [
